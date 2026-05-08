@@ -1,0 +1,6 @@
+{
+  "name": "AI Support Ops Copilot",
+  "description": "An AI-native support operations workflow that processes raw support tickets to provide classification, priority, suggested responses, escalation decisions, Jira bug drafts, and Knowledge Base suggestions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
