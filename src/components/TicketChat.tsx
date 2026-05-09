@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { TicketAnalysis, chatAboutTicket, ChatMessage } from '../services/ai';
 import { cn } from '../lib/utils';
-import Markdown from 'react-markdown';
+const Markdown = lazy(() => import('react-markdown'));
 
 export function TicketChat({ result, rawContent }: { result: TicketAnalysis, rawContent: string }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -67,7 +67,11 @@ export function TicketChat({ result, rawContent }: { result: TicketAnalysis, raw
                 ? "bg-indigo-600 text-white rounded-tr-none" 
                 : "bg-white border border-gray-100 text-gray-800 rounded-tl-none markdown-body prose prose-sm max-w-none"
             )}>
-              {msg.role === 'user' ? msg.content : <Markdown>{msg.content}</Markdown>}
+              {msg.role === 'user' ? msg.content : (
+                <Suspense fallback={<span className="animate-pulse">...</span>}>
+                  <Markdown>{msg.content}</Markdown>
+                </Suspense>
+              )}
             </div>
 
             {msg.role === 'user' && (

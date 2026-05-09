@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { TicketAnalysis } from '../../services/ai';
-import { Bug, CheckCircle, Undo2, Save, PencilLine } from 'lucide-react';
-import ReactQuill from 'react-quill';
+import { Bug, CheckCircle, Undo2, Save, PencilLine, ExternalLink } from 'lucide-react';
+const ReactQuill = lazy(() => import('react-quill-new'));
 import { cn } from '../../lib/utils';
-import 'react-quill/dist/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 
 export function JiraDraftBlock({ result }: { result: TicketAnalysis }) {
   const [jiraTitle, setJiraTitle] = useState(result.jiraBugDraft?.title || '');
@@ -50,25 +50,27 @@ export function JiraDraftBlock({ result }: { result: TicketAnalysis }) {
         </div>
         <div className="react-quill-wrapper pb-8">
           <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Description</div>
-          <ReactQuill 
-            theme="snow"
-            value={jiraDescription}
-            onChange={(value) => { setJiraDescription(value); setIsJiraDraftSaved(false); }}
-            readOnly={isJiraDraftSaved}
-            modules={{ toolbar: isJiraDraftSaved ? false : [
-              [{ 'header': [1, 2, false] }],
-              ['bold', 'italic', 'underline', 'strike'],
-              [{'list': 'ordered'}, {'list': 'bullet'}],
-              ['link', 'code-block'],
-              ['clean']
-            ]}}
-            className={cn(
-              "text-sm font-sans transition-all [&_.ql-editor]:min-h-[150px]",
-              isJiraDraftSaved 
-                ? "[&_.ql-container]:border-transparent [&_.ql-editor]:px-0" 
-                : "bg-white [&_.ql-container]:rounded-b-md [&_.ql-toolbar]:rounded-t-md focus-within:ring-2 focus-within:ring-blue-500 rounded-md"
-            )}
-          />
+          <Suspense fallback={<div className="h-[150px] bg-gray-50 animate-pulse rounded-md border border-gray-100 flex items-center justify-center text-xs text-gray-400">Loading editor...</div>}>
+            <ReactQuill 
+              theme="snow"
+              value={jiraDescription}
+              onChange={(value) => { setJiraDescription(value); setIsJiraDraftSaved(false); }}
+              readOnly={isJiraDraftSaved}
+              modules={{ toolbar: isJiraDraftSaved ? false : [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{'list': 'ordered'}, {'list': 'bullet'}],
+                ['link', 'code-block'],
+                ['clean']
+              ]}}
+              className={cn(
+                "text-sm font-sans transition-all [&_.ql-editor]:min-h-[150px]",
+                isJiraDraftSaved 
+                  ? "[&_.ql-container]:border-transparent [&_.ql-editor]:px-0" 
+                  : "bg-white [&_.ql-container]:rounded-b-md [&_.ql-toolbar]:rounded-t-md focus-within:ring-2 focus-within:ring-blue-500 rounded-md"
+              )}
+            />
+          </Suspense>
         </div>
         {isJiraDraftSaved && (
           <div className="absolute top-4 right-4 flex gap-2 animate-in fade-in duration-200">
@@ -120,6 +122,15 @@ export function JiraDraftBlock({ result }: { result: TicketAnalysis }) {
                 Save Draft
               </button>
             )}
+            <a 
+              href={`https://jira.example.com/secure/CreateIssue.jspa?issuetype=1&summary=${encodeURIComponent(jiraTitle)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-medium text-white hover:bg-blue-700 bg-blue-600 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 shadow-sm"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Create in Jira
+            </a>
           </div>
         </div>
         

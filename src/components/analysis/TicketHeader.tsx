@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TicketAnalysis } from '../../services/ai';
-import { AlertTriangle, Tag, Smile, Frown, Meh, PencilLine, Undo2, Save, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Tag, Smile, Frown, Meh, PencilLine, Undo2, Save, CheckCircle, Info } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export function TicketHeader({
@@ -40,7 +40,8 @@ export function TicketHeader({
         icon: <Frown className="w-4 h-4" />, 
         bgIcon: <Frown className="w-8 h-8 text-red-500 opacity-20" />,
         label: 'Frustrated', 
-        classes: 'bg-red-50 border-red-200 text-red-700' 
+        classes: 'bg-red-50 border-red-200 text-red-700',
+        description: 'Customer expresses dissatisfaction or annoyance. Requires empathetic handling.'
       };
     }
     if (s.includes('happ') || s.includes('satisfi') || s.includes('positiv')) {
@@ -48,14 +49,16 @@ export function TicketHeader({
         icon: <Smile className="w-4 h-4" />, 
         bgIcon: <Smile className="w-8 h-8 text-green-500 opacity-20" />,
         label: 'Happy', 
-        classes: 'bg-green-50 border-green-200 text-green-700' 
+        classes: 'bg-green-50 border-green-200 text-green-700',
+        description: 'Customer expresses satisfaction. Opportunity to build loyalty.'
       };
     }
     return { 
       icon: <Meh className="w-4 h-4" />, 
       bgIcon: <Meh className="w-8 h-8 text-yellow-500 opacity-20" />,
       label: 'Neutral', 
-      classes: 'bg-yellow-50 border-yellow-200 text-yellow-700' 
+      classes: 'bg-yellow-50 border-yellow-200 text-yellow-700',
+      description: 'Customer is neutral or transactional. Standard response appropriate.'
     };
   };
 
@@ -158,7 +161,16 @@ export function TicketHeader({
         {/* Sentiment */}
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-sm text-gray-500 font-medium">Sentiment</span>
+            <div className="flex items-center gap-1.5 text-sm text-gray-500 font-medium">
+              Sentiment
+              <div className="relative group/tooltip flex items-center">
+                <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors cursor-help" />
+                <div className="absolute opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 text-xs bg-gray-900 text-gray-100 p-2 rounded-lg shadow-lg pointer-events-none text-center leading-relaxed">
+                  {sentimentDisplay.description}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900" />
+                </div>
+              </div>
+            </div>
             <span className={cn('px-2.5 py-0.5 rounded-full text-xs font-semibold mt-1 w-max border flex items-center gap-1.5', sentimentDisplay.classes)}>
               {sentimentDisplay.icon}
               {sentimentDisplay.label}

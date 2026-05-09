@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { TicketAnalysis } from '../services/ai';
 import { ArrowUpRight, Search } from 'lucide-react';
 import { TicketChat } from './TicketChat';
@@ -8,7 +8,7 @@ import { SuggestedResponseBlock } from './analysis/SuggestedResponseBlock';
 import { JiraDraftBlock } from './analysis/JiraDraftBlock';
 import { KbSuggestionBlock } from './analysis/KbSuggestionBlock';
 import { LatestNewsBlock } from './analysis/LatestNewsBlock';
-import { KbEditorModal } from './analysis/KbEditorModal';
+const KbEditorModal = lazy(() => import('./analysis/KbEditorModal').then(module => ({ default: module.KbEditorModal })));
 
 export function AnalysisResult({ 
   result, 
@@ -97,12 +97,16 @@ export function AnalysisResult({
 
       </div>
 
-      <KbEditorModal 
-        isOpen={isKbEditorOpen} 
-        isLoading={isKbEditorLoading} 
-        onClose={() => setIsKbEditorOpen(false)} 
-        result={result} 
-      />
+      {isKbEditorOpen && (
+        <Suspense fallback={null}>
+          <KbEditorModal 
+            isOpen={isKbEditorOpen} 
+            isLoading={isKbEditorLoading} 
+            onClose={() => setIsKbEditorOpen(false)} 
+            result={result} 
+          />
+        </Suspense>
+      )}
     </div>
   );
 }
