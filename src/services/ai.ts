@@ -3,6 +3,7 @@ import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export interface TicketAnalysis {
+  title?: string;
   classification: string;
   sentiment: string;
   priority: string;
@@ -26,6 +27,10 @@ export async function analyzeTicket(
   const ticketAnalysisSchema = {
     type: Type.OBJECT,
     properties: {
+      title: {
+        type: Type.STRING,
+        description: "A concise, descriptive title for the ticket.",
+      },
       classification: {
         type: Type.STRING,
         description: `The category or classification of the ticket. Should be one of these if possible, but can create a new one if none fit: ${allowedClassifications.join(", ")}.`,
@@ -178,10 +183,10 @@ ${ticketContent}
 Classification: ${classification}
 
 Return the latest relevant news articles using the provided schema. If there are no relevant news articles, return an empty array.`,
-      tools: [
-        { googleSearch: {} }
-      ],
       config: {
+        tools: [
+          { googleSearch: {} }
+        ],
         responseMimeType: "application/json",
         responseSchema: schema,
         temperature: 0.2, // Low temperature for more factual results
