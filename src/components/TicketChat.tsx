@@ -1,8 +1,43 @@
-import { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense, memo, useCallback } from 'react';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { TicketAnalysis, chatAboutTicket, ChatMessage } from '../services/ai';
 import { cn } from '../lib/utils';
 const Markdown = lazy(() => import('react-markdown'));
+
+const MessageBubble = memo(function MessageBubble({ msg }: { msg: ChatMessage }) {
+  return (
+    <div className={cn('flex gap-3', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+      {msg.role === 'model' && (
+        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+          <Bot className="w-4 h-4 text-indigo-600" />
+        </div>
+      )}
+
+      <div
+        className={cn(
+          'max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm',
+          msg.role === 'user'
+            ? 'bg-indigo-600 text-white rounded-tr-none'
+            : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none markdown-body prose prose-sm max-w-none'
+        )}
+      >
+        {msg.role === 'user' ? (
+          msg.content
+        ) : (
+          <Suspense fallback={<span className="animate-pulse">...</span>}>
+            <Markdown>{msg.content}</Markdown>
+          </Suspense>
+        )}
+      </div>
+
+      {msg.role === 'user' && (
+        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+          <User className="w-4 h-4 text-gray-500" />
+        </div>
+      )}
+    </div>
+  );
+});
 
 export function TicketChat({ result, rawContent }: { result: TicketAnalysis, rawContent: string }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -14,7 +49,7 @@ export function TicketChat({ result, rawContent }: { result: TicketAnalysis, raw
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
@@ -31,7 +66,7 @@ export function TicketChat({ result, rawContent }: { result: TicketAnalysis, raw
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, isLoading, rawContent, result, messages]);
 
   return (
     <div className="flex flex-col h-[500px] bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -53,34 +88,7 @@ export function TicketChat({ result, rawContent }: { result: TicketAnalysis, raw
           </div>
         )}
         
-        {messages.map((msg, idx) => (
-          <div key={idx} className={cn("flex gap-3", msg.role === 'user' ? "justify-end" : "justify-start")}>
-            {msg.role === 'model' && (
-              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-                <Bot className="w-4 h-4 text-indigo-600" />
-              </div>
-            )}
-            
-            <div className={cn(
-              "max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm",
-              msg.role === 'user' 
-                ? "bg-indigo-600 text-white rounded-tr-none" 
-                : "bg-white border border-gray-100 text-gray-800 rounded-tl-none markdown-body prose prose-sm max-w-none"
-            )}>
-              {msg.role === 'user' ? msg.content : (
-                <Suspense fallback={<span className="animate-pulse">...</span>}>
-                  <Markdown>{msg.content}</Markdown>
-                </Suspense>
-              )}
-            </div>
-
-            {msg.role === 'user' && (
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                <User className="w-4 h-4 text-gray-500" />
-              </div>
-            )}
-          </div>
-        ))}
+        {messages.map((msg, idx) => <MessageBubble key={idx} msg={msg} />)}
         
         {isLoading && (
           <div className="flex gap-3 justify-start">
