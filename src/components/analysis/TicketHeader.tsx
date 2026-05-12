@@ -3,6 +3,12 @@ import { TicketAnalysis } from '../../services/ai';
 import { AlertTriangle, Tag, Smile, Frown, Meh, PencilLine, Undo2, Save, CheckCircle, Info } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
+type TrafficStatus = {
+  label: 'Red' | 'Amber' | 'Green';
+  classes: string;
+  description: string;
+};
+
 export function TicketHeader({
   result,
   priorities,
@@ -64,6 +70,44 @@ export function TicketHeader({
 
   const sentimentDisplay = getSentimentDisplay();
 
+  const getTrafficStatus = (): TrafficStatus => {
+    const priority = result.priority.toLowerCase();
+    const sentiment = result.sentiment.toLowerCase();
+    const escalation = result.escalationDecision.toLowerCase();
+
+    const isRed =
+      priority.includes('critical') ||
+      sentiment.includes('frustrat') ||
+      sentiment.includes('angr') ||
+      escalation.includes('escalat');
+
+    if (isRed) {
+      return {
+        label: 'Red',
+        classes: 'bg-rose-50 text-rose-700 border-rose-200',
+        description: 'High risk ticket. Immediate action recommended.'
+      };
+    }
+
+    const isAmber = priority.includes('high') || priority.includes('medium') || sentiment.includes('neutral');
+
+    if (isAmber) {
+      return {
+        label: 'Amber',
+        classes: 'bg-amber-50 text-amber-700 border-amber-200',
+        description: 'Moderate risk ticket. Handle soon and monitor.'
+      };
+    }
+
+    return {
+      label: 'Green',
+      classes: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      description: 'Low risk ticket. Standard response is sufficient.'
+    };
+  };
+
+  const trafficStatus = getTrafficStatus();
+
   return (
     <>
       {/* Ticket Title */}
@@ -121,7 +165,20 @@ export function TicketHeader({
       </section>
 
       {/* Top Banner - Key Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* Traffic Status */}
+        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500 font-medium">Ticket Status</span>
+            <span className={cn('mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border w-max inline-flex items-center gap-1.5', trafficStatus.classes)}>
+              <span className={cn('h-2 w-2 rounded-full', trafficStatus.label === 'Red' ? 'bg-rose-500' : trafficStatus.label === 'Amber' ? 'bg-amber-500' : 'bg-emerald-500')} />
+              {trafficStatus.label}
+            </span>
+            <span className="mt-1 text-xs text-gray-500">{trafficStatus.description}</span>
+          </div>
+          <div className={cn('h-8 w-8 rounded-full border-2', trafficStatus.label === 'Red' ? 'border-rose-300 bg-rose-100' : trafficStatus.label === 'Amber' ? 'border-amber-300 bg-amber-100' : 'border-emerald-300 bg-emerald-100')} />
+        </div>
+
         {/* Priority */}
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
           <div className="flex flex-col flex-1 gap-1">
