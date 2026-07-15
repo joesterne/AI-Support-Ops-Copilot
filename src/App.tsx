@@ -4,7 +4,8 @@ import { AnalysisResult } from './components/AnalysisResult';
 import { SettingsMenu } from './components/SettingsMenu';
 import { EmailModal } from './components/EmailModal';
 import { analyzeTicket, TicketAnalysis } from './services/ai';
-import { Bot, Sparkles, History, Menu, X, Settings2 } from 'lucide-react';
+import { DEFAULT_CLASSIFICATIONS, DEFAULT_PRIORITIES, getPriorityColorClasses } from './lib/ticketDisplay';
+import { Bot, Sparkles, History, X, Settings2 } from 'lucide-react';
 
 interface HistoryItem {
   id: string;
@@ -12,15 +13,6 @@ interface HistoryItem {
   rawContent: string;
   analysis: TicketAnalysis;
 }
-
-const getPriorityColors = (priority: string) => {
-  const p = priority?.toLowerCase() || '';
-  if (p.includes('critical')) return 'bg-rose-100 text-rose-700 border-rose-200';
-  if (p.includes('high')) return 'bg-orange-100 text-orange-700 border-orange-200';
-  if (p.includes('medium')) return 'bg-amber-100 text-amber-700 border-amber-200';
-  if (p.includes('low')) return 'bg-blue-100 text-blue-700 border-blue-200';
-  return 'bg-gray-100 text-gray-700 border-gray-200';
-};
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,10 +27,8 @@ export default function App() {
   const [emailBody, setEmailBody] = useState('');
   const [emailClassification, setEmailClassification] = useState('');
 
-  const [priorities, setPriorities] = useState<string[]>(['Low', 'Medium', 'High', 'Critical']);
-  const [classifications, setClassifications] = useState<string[]>([
-    'Billing', 'Technical Support', 'Feature Request', 'Bug', 'General Inquiry'
-  ]);
+  const [priorities, setPriorities] = useState<string[]>([...DEFAULT_PRIORITIES]);
+  const [classifications, setClassifications] = useState<string[]>([...DEFAULT_CLASSIFICATIONS]);
 
   const handleAnalyze = async (content: string) => {
     setIsLoading(true);
@@ -194,7 +184,7 @@ export default function App() {
                        }}
                      >
                        <div className="flex items-center justify-between">
-                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold border ${getPriorityColors(item.analysis.priority)}`}>
+                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold border ${getPriorityColorClasses(item.analysis.priority)}`}>
                            {item.analysis.priority}
                          </span>
                          <span className="text-xs font-medium text-gray-500">

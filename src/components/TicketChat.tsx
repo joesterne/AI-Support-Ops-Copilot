@@ -54,7 +54,8 @@ export function TicketChat({ result, rawContent }: { result: TicketAnalysis, raw
 
     const userMessage = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    const nextMessages: ChatMessage[] = [...messages, { role: 'user', content: userMessage }];
+    setMessages(nextMessages);
     setIsLoading(true);
 
     try {
@@ -62,7 +63,7 @@ export function TicketChat({ result, rawContent }: { result: TicketAnalysis, raw
       setMessages(prev => [...prev, { role: 'model', content: response }]);
     } catch (error) {
       console.error(error);
-      setMessages(prev => [...prev, { role: 'model', content: "Sorry, I ran into an error while trying to process your request." }]);
+      setMessages(prev => [...prev, { role: 'model', content: 'Sorry, I ran into an error while trying to process your request.' }]);
     } finally {
       setIsLoading(false);
     }
