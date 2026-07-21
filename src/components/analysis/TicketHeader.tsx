@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { TicketAnalysis } from '../../services/ai';
 import { AlertTriangle, Tag, Smile, Frown, Meh, PencilLine, Undo2, Save, CheckCircle, Info } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { getPriorityColorClasses, UNTITLED_TICKET, withCustomOption } from '../../lib/ticketDisplay';
 
 type TrafficStatus = {
   label: 'Red' | 'Amber' | 'Green';
@@ -20,24 +21,15 @@ export function TicketHeader({
   classifications: string[];
   onUpdate: (result: TicketAnalysis) => void;
 }) {
-  const [editedTitle, setEditedTitle] = useState(result.title || 'Untitled Ticket');
+  const [editedTitle, setEditedTitle] = useState(result.title || UNTITLED_TICKET);
   const [isTitleSaved, setIsTitleSaved] = useState(false);
 
   useEffect(() => {
-    setEditedTitle(result.title || 'Untitled Ticket');
+    setEditedTitle(result.title || UNTITLED_TICKET);
     setIsTitleSaved(false);
   }, [result.title]);
 
-  const getPriorityColor = (priority: string) => {
-    const p = priority?.toLowerCase() || '';
-    if (p.includes('critical')) return 'bg-rose-100 text-rose-700 border-rose-200';
-    if (p.includes('high')) return 'bg-orange-100 text-orange-700 border-orange-200';
-    if (p.includes('medium')) return 'bg-amber-100 text-amber-700 border-amber-200';
-    if (p.includes('low')) return 'bg-blue-100 text-blue-700 border-blue-200';
-    return 'bg-gray-100 text-gray-700 border-gray-200';
-  };
-
-  const pColor = getPriorityColor(result.priority);
+  const priorityColorClasses = getPriorityColorClasses(result.priority);
 
   const getSentimentDisplay = () => {
     const s = result.sentiment.toLowerCase();
@@ -135,11 +127,11 @@ export function TicketHeader({
           )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          {editedTitle !== (result.title || 'Untitled Ticket') && !isTitleSaved && (
+          {editedTitle !== (result.title || UNTITLED_TICKET) && !isTitleSaved && (
             <>
               <button 
                 onClick={() => {
-                  setEditedTitle(result.title || 'Untitled Ticket');
+                  setEditedTitle(result.title || UNTITLED_TICKET);
                   setIsTitleSaved(false);
                 }}
                 className="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 shadow-sm px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
@@ -186,15 +178,16 @@ export function TicketHeader({
             <select
               value={result.priority}
               onChange={(e) => onUpdate({ ...result, priority: e.target.value })}
-              className={cn('px-2.5 py-1 rounded-full text-xs font-semibold w-max border cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500', pColor)}
+              className={cn('px-2.5 py-1 rounded-full text-xs font-semibold w-max border cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500', priorityColorClasses)}
             >
-              {!priorities.includes(result.priority) && (
-                <option value={result.priority}>{result.priority}</option>
-              )}
-              {priorities.map(p => <option key={p} value={p} className="bg-white text-gray-900">{p}</option>)}
+              {withCustomOption(priorities, result.priority).map((priority) => (
+                <option key={priority} value={priority} className="bg-white text-gray-900">
+                  {priority}
+                </option>
+              ))}
             </select>
           </div>
-          <AlertTriangle className={cn('w-8 h-8 opacity-20', pColor.split(' ')[1])} />
+          <AlertTriangle className={cn('w-8 h-8 opacity-20', priorityColorClasses.split(' ')[1])} />
         </div>
 
         {/* Classification */}
@@ -207,10 +200,11 @@ export function TicketHeader({
               onChange={(e) => onUpdate({ ...result, classification: e.target.value })}
               className="flex-1 text-gray-900 font-semibold bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-indigo-500 focus:ring-0 px-0 py-0.5 outline-none cursor-pointer text-sm truncate"
             >
-              {!classifications.includes(result.classification) && (
-                <option value={result.classification}>{result.classification}</option>
-              )}
-              {classifications.map(c => <option key={c} value={c}>{c}</option>)}
+              {withCustomOption(classifications, result.classification).map((classification) => (
+                <option key={classification} value={classification}>
+                  {classification}
+                </option>
+              ))}
             </select>
           </div>
         </div>

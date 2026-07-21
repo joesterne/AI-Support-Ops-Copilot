@@ -4,5 +4,14 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
+
+# Local environment files may contain secrets and must not be committed.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Keep the documented template tracked.
 !.env.example

@@ -1,4 +1,5 @@
-import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI, Type, type Content } from "@google/genai";
+import { DEFAULT_CLASSIFICATIONS, DEFAULT_PRIORITIES } from "../lib/ticketDisplay";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -21,8 +22,8 @@ export interface TicketAnalysis {
 
 export async function analyzeTicket(
   ticketContent: string,
-  allowedPriorities: string[] = ["Low", "Medium", "High", "Critical"],
-  allowedClassifications: string[] = ["Billing", "Technical Support", "Feature Request", "Bug"]
+  allowedPriorities: string[] = [...DEFAULT_PRIORITIES],
+  allowedClassifications: string[] = [...DEFAULT_CLASSIFICATIONS]
 ): Promise<TicketAnalysis> {
   const ticketAnalysisSchema = {
     type: Type.OBJECT,
@@ -121,7 +122,7 @@ ${JSON.stringify(analysisResult, null, 2)}
 
 Provide concise, highly actionable advice. Help the agent draft replies, navigate company policies, or handle angry customers.`;
 
-  const contents: any[] = history.map(msg => ({
+  const contents: Content[] = history.map(msg => ({
     role: msg.role,
     parts: [{ text: msg.content }]
   }));
@@ -131,7 +132,7 @@ Provide concise, highly actionable advice. Help the agent draft replies, navigat
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3.1-pro-preview",
-      contents: contents,
+      contents,
       config: {
         systemInstruction,
         temperature: 0.5,
