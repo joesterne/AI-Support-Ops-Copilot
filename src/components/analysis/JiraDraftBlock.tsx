@@ -1,11 +1,11 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, memo } from 'react';
 import { TicketAnalysis } from '../../services/ai';
 import { Bug, CheckCircle, Undo2, Save, PencilLine, ExternalLink } from 'lucide-react';
 const ReactQuill = lazy(() => import('react-quill-new'));
 import { cn } from '../../lib/utils';
 import 'react-quill-new/dist/quill.snow.css';
 
-export function JiraDraftBlock({ result }: { result: TicketAnalysis }) {
+export const JiraDraftBlock = memo(function JiraDraftBlock({ result }: { result: TicketAnalysis }) {
   const [jiraTitle, setJiraTitle] = useState(result.jiraBugDraft?.title || '');
   const [jiraDescription, setJiraDescription] = useState(result.jiraBugDraft?.description || '');
   const [isJiraDraftSaved, setIsJiraDraftSaved] = useState(false);
@@ -172,4 +172,4 @@ export function JiraDraftBlock({ result }: { result: TicketAnalysis }) {
       </div>
     </section>
   );
-}
+});

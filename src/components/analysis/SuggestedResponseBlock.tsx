@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { TicketAnalysis } from '../../services/ai';
 import { MessageSquare, PencilLine, CheckCircle, Undo2, Save, Mail } from 'lucide-react';
 
-export function SuggestedResponseBlock({
+export const SuggestedResponseBlock = memo(function SuggestedResponseBlock({
   result,
   onSendEmail
 }: {
@@ -129,4 +129,4 @@ export function SuggestedResponseBlock({
       </div>
     </section>
   );
-}
+});

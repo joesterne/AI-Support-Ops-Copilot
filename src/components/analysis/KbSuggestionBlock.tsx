@@ -1,7 +1,8 @@
+import { memo } from 'react';
 import { TicketAnalysis } from '../../services/ai';
 import { BookOpen } from 'lucide-react';
 
-export function KbSuggestionBlock({
+export const KbSuggestionBlock = memo(function KbSuggestionBlock({
   result,
   onOpenEditor
 }: {
@@ -38,4 +39,4 @@ export function KbSuggestionBlock({
       </div>
     </section>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -7,7 +7,7 @@ interface TicketFormProps {
   isLoading: boolean;
 }
 
-export function TicketForm({ onAnalyze, isLoading }: TicketFormProps) {
+export const TicketForm = memo(function TicketForm({ onAnalyze, isLoading }: TicketFormProps) {
   const [ticketContent, setTicketContent] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -72,4 +72,4 @@ export function TicketForm({ onAnalyze, isLoading }: TicketFormProps) {
       </div>
     </form>
   );
-}
+});

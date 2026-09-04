@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, memo } from 'react';
 import { TicketAnalysis } from '../services/ai';
 import { ArrowUpRight, Search } from 'lucide-react';
 import { TicketChat } from './TicketChat';
@@ -10,7 +10,7 @@ import { KbSuggestionBlock } from './analysis/KbSuggestionBlock';
 import { LatestNewsBlock } from './analysis/LatestNewsBlock';
 const KbEditorModal = lazy(() => import('./analysis/KbEditorModal').then(module => ({ default: module.KbEditorModal })));
 
-export function AnalysisResult({ 
+export const AnalysisResult = memo(function AnalysisResult({ 
   result, 
   rawContent,
   onUpdate,
@@ -109,4 +109,4 @@ export function AnalysisResult({
       )}
     </div>
   );
-}
+});

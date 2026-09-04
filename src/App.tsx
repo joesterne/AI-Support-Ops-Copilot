@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { TicketForm } from './components/TicketForm';
 import { AnalysisResult } from './components/AnalysisResult';
 import { SettingsMenu } from './components/SettingsMenu';
@@ -40,7 +40,7 @@ export default function App() {
     'Billing', 'Technical Support', 'Feature Request', 'Bug', 'General Inquiry'
   ]);
 
-  const handleAnalyze = async (content: string) => {
+  const handleAnalyze = useCallback(async (content: string) => {
     setIsLoading(true);
     setError(null);
     setResult(null);
@@ -60,20 +60,26 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [priorities, classifications]);
 
-  const handleRestoreHistory = (item: HistoryItem) => {
+  const handleRestoreHistory = useCallback((item: HistoryItem) => {
     setResult(item.analysis);
     setCurrentTicketContent(item.rawContent);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
-  const handleUpdateResult = (updatedResult: TicketAnalysis) => {
+  const handleUpdateResult = useCallback((updatedResult: TicketAnalysis) => {
     setResult(updatedResult);
-    setHistory(prev => prev.map(item => 
-      item.id === history[0]?.id ? { ...item, analysis: updatedResult } : item
+    setHistory(prev => prev.map((item, index) => 
+      index === 0 ? { ...item, analysis: updatedResult } : item
     ));
-  };
+  }, []);
+
+  const handleSendEmail = useCallback((body: string, classification: string) => {
+    setEmailBody(body);
+    setEmailClassification(classification);
+    setIsEmailModalOpen(true);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
@@ -151,11 +157,7 @@ export default function App() {
               onUpdate={handleUpdateResult}
               priorities={priorities}
               classifications={classifications}
-              onSendEmail={(body, classification) => {
-                setEmailBody(body);
-                setEmailClassification(classification);
-                setIsEmailModalOpen(true);
-              }}
+              onSendEmail={handleSendEmail}
             />
           </section>
         )}

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { TicketAnalysis, fetchLatestNews, NewsArticle } from '../../services/ai';
 import { Newspaper, ArrowUpRight, AlertTriangle, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 
-function ArticleItem({ article }: { article: NewsArticle }) {
+const ArticleItem = memo(function ArticleItem({ article }: { article: NewsArticle }) {
   const [showPreview, setShowPreview] = useState(false);
 
   return (
@@ -42,9 +42,9 @@ function ArticleItem({ article }: { article: NewsArticle }) {
       )}
     </div>
   );
-}
+});
 
-export function LatestNewsBlock({
+export const LatestNewsBlock = memo(function LatestNewsBlock({
   result,
   rawContent
 }: {
@@ -120,4 +120,4 @@ export function LatestNewsBlock({
       </div>
     </section>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { TicketAnalysis } from '../../services/ai';
 import { AlertTriangle, Tag, Smile, Frown, Meh, PencilLine, Undo2, Save, CheckCircle, Info } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -9,7 +9,7 @@ type TrafficStatus = {
   description: string;
 };
 
-export function TicketHeader({
+export const TicketHeader = memo(function TicketHeader({
   result,
   priorities,
   classifications,
@@ -238,4 +238,4 @@ export function TicketHeader({
       </div>
     </>
   );
-}
+});
