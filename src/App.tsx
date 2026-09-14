@@ -4,7 +4,7 @@ import { AnalysisResult } from './components/AnalysisResult';
 import { SettingsMenu } from './components/SettingsMenu';
 import { EmailModal } from './components/EmailModal';
 import { analyzeTicket, TicketAnalysis } from './services/ai';
-import { Bot, Sparkles, History, Menu, X, Settings2 } from 'lucide-react';
+import { Bot, Sparkles, History, X, Settings2 } from 'lucide-react';
 
 interface HistoryItem {
   id: string;
@@ -234,12 +234,14 @@ export default function App() {
         setClassifications={setClassifications}
       />
 
-      <EmailModal
-        isOpen={isEmailModalOpen}
-        onClose={() => setIsEmailModalOpen(false)}
-        defaultBody={emailBody}
-        classification={emailClassification}
-      />
+      {isEmailModalOpen && (
+        <EmailModal
+          isOpen={isEmailModalOpen}
+          onClose={() => setIsEmailModalOpen(false)}
+          defaultBody={emailBody}
+          classification={emailClassification}
+        />
+      )}
     </div>
   );
 }

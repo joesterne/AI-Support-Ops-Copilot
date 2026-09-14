@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { BookOpen, X, Loader2 } from 'lucide-react';
 import { TicketAnalysis } from '../../services/ai';
 
@@ -15,13 +15,6 @@ export function KbEditorModal({
 }) {
   const [kbDraftTitle, setKbDraftTitle] = useState(result.kbSuggestion?.title || '');
   const [kbDraftContent, setKbDraftContent] = useState(result.kbSuggestion?.outline || '');
-
-  useEffect(() => {
-    if (isOpen) {
-      setKbDraftTitle(result.kbSuggestion?.title || '');
-      setKbDraftContent(result.kbSuggestion?.outline || '');
-    }
-  }, [isOpen, result.kbSuggestion]);
 
   if (!isOpen) return null;
 

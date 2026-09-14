@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -121,7 +121,7 @@ ${JSON.stringify(analysisResult, null, 2)}
 
 Provide concise, highly actionable advice. Help the agent draft replies, navigate company policies, or handle angry customers.`;
 
-  const contents: any[] = history.map(msg => ({
+  const contents: { role: string; parts: { text: string }[] }[] = history.map(msg => ({
     role: msg.role,
     parts: [{ text: msg.content }]
   }));

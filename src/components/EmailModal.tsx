@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Mail, Send, CheckCircle } from 'lucide-react';
 
 interface EmailModalProps {
@@ -10,18 +10,9 @@ interface EmailModalProps {
 
 export function EmailModal({ isOpen, onClose, defaultBody, classification }: EmailModalProps) {
   const [to, setTo] = useState('');
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
+  const [subject, setSubject] = useState(`Re: Ticket - ${classification}`);
+  const [body, setBody] = useState(defaultBody);
   const [isSent, setIsSent] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setSubject(`Re: Ticket - ${classification}`);
-      setBody(defaultBody);
-      setTo('');
-      setIsSent(false);
-    }
-  }, [isOpen, defaultBody, classification]);
 
   if (!isOpen) return null;
 
