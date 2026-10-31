@@ -57,7 +57,10 @@ export const LatestNewsBlock = memo(function LatestNewsBlock({
   useEffect(() => {
     setNewsArticles([]);
     setNewsStatus('idle');
-  }, [result, rawContent]);
+    // Keyed on the values that actually invalidate fetched news — depending on
+    // the whole result object wiped articles on any unrelated edit (e.g. a
+    // priority change creating a new result object).
+  }, [rawContent, result.classification]);
 
   const handleFetchNews = async () => {
     setNewsStatus('loading');

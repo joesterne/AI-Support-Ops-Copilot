@@ -33,7 +33,11 @@ export async function analyzeTicket(
       },
       classification: {
         type: Type.STRING,
-        description: `The category or classification of the ticket. Should be one of these if possible, but can create a new one if none fit: ${allowedClassifications.join(", ")}.`,
+        // Wording no longer contradicts the enum: when the enum is supplied
+        // the model cannot invent a new classification.
+        description: allowedClassifications.length > 0
+          ? `The category or classification of the ticket. Must be one of: ${allowedClassifications.join(", ")}.`
+          : "The category or classification of the ticket.",
         enum: allowedClassifications.length > 0 ? allowedClassifications : undefined,
       },
       sentiment: {
@@ -173,31 +177,49 @@ export async function fetchLatestNews(
   };
 
   try {
-    const response = await ai.models.generateContent({
+    // The Gemini API does not allow structured JSON output (responseMimeType /
+    // responseSchema) together with tools, so the grounded search and the
+    // structured extraction are two separate calls. Combining them made this
+    // request fail every time and Latest News always landed in its error state.
+    const grounded = await ai.models.generateContent({
       model: "gemini-3.1-pro-preview",
-      contents: `Find the 3 most recent news articles related to this customer ticket issue. 
-      
+      contents: `Find the 3 most recent news articles related to this customer ticket issue.
+
 Ticket Content:
 ${ticketContent}
 
 Classification: ${classification}
 
-Return the latest relevant news articles using the provided schema. If there are no relevant news articles, return an empty array.`,
+List each article you find with its title, a concise summary, and its URL. If there are no relevant news articles, say so plainly.`,
       config: {
         tools: [
           { googleSearch: {} }
         ],
-        responseMimeType: "application/json",
-        responseSchema: schema,
         temperature: 0.2, // Low temperature for more factual results
       }
     });
 
-    if (!response.text) {
+    if (!grounded.text) {
       return [];
     }
 
-    return JSON.parse(response.text) as NewsArticle[];
+    const extraction = await ai.models.generateContent({
+      model: "gemini-3.1-pro-preview",
+      contents: `Extract the news articles from the text below into the provided schema. If the text says there are no relevant articles, return an empty array.
+
+${grounded.text}`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+        temperature: 0.2,
+      }
+    });
+
+    if (!extraction.text) {
+      return [];
+    }
+
+    return JSON.parse(extraction.text) as NewsArticle[];
   } catch (error) {
     console.error("Error fetching news:", error);
     throw new Error("Failed to fetch latest news.");

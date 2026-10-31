@@ -4,10 +4,12 @@ import { MessageSquare, PencilLine, CheckCircle, Undo2, Save, Mail } from 'lucid
 
 export const SuggestedResponseBlock = memo(function SuggestedResponseBlock({
   result,
-  onSendEmail
+  onSendEmail,
+  onUpdate
 }: {
   result: TicketAnalysis;
   onSendEmail: (body: string, classification: string) => void;
+  onUpdate: (result: TicketAnalysis) => void;
 }) {
   const [editedResponse, setEditedResponse] = useState(result.suggestedResponse);
   const [isCopied, setIsCopied] = useState(false);
@@ -97,8 +99,13 @@ export const SuggestedResponseBlock = memo(function SuggestedResponseBlock({
             </button>
           )}
           {!isResponseSaved && editedResponse !== result.suggestedResponse && (
-            <button 
-              onClick={() => setIsResponseSaved(true)}
+            <button
+              onClick={() => {
+                // Was: only flipped a local flag, so the edit never reached
+                // the parent result (chat context kept the original text).
+                onUpdate({ ...result, suggestedResponse: editedResponse });
+                setIsResponseSaved(true);
+              }}
               className="text-sm font-medium text-white hover:bg-emerald-700 bg-emerald-600 px-4 py-2 rounded-lg border border-emerald-700 transition-colors flex items-center gap-1.5 shadow-sm"
             >
               <Save className="w-4 h-4" />

@@ -1,7 +1,7 @@
 import { useState, useEffect, memo } from 'react';
 import { TicketAnalysis } from '../../services/ai';
 import { AlertTriangle, Tag, Smile, Frown, Meh, PencilLine, Undo2, Save, CheckCircle, Info } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn, getPriorityColors } from '../../lib/utils';
 
 type TrafficStatus = {
   label: 'Red' | 'Amber' | 'Green';
@@ -28,16 +28,7 @@ export const TicketHeader = memo(function TicketHeader({
     setIsTitleSaved(false);
   }, [result.title]);
 
-  const getPriorityColor = (priority: string) => {
-    const p = priority?.toLowerCase() || '';
-    if (p.includes('critical')) return 'bg-rose-100 text-rose-700 border-rose-200';
-    if (p.includes('high')) return 'bg-orange-100 text-orange-700 border-orange-200';
-    if (p.includes('medium')) return 'bg-amber-100 text-amber-700 border-amber-200';
-    if (p.includes('low')) return 'bg-blue-100 text-blue-700 border-blue-200';
-    return 'bg-gray-100 text-gray-700 border-gray-200';
-  };
-
-  const pColor = getPriorityColor(result.priority);
+  const pColor = getPriorityColors(result.priority);
 
   const getSentimentDisplay = () => {
     const s = result.sentiment.toLowerCase();
@@ -75,11 +66,17 @@ export const TicketHeader = memo(function TicketHeader({
     const sentiment = result.sentiment.toLowerCase();
     const escalation = result.escalationDecision.toLowerCase();
 
+    // Only AFFIRMATIVE escalation counts: the bare substring 'escalat' also
+    // matches "No escalation needed", which flagged almost every ticket Red.
+    const isEscalationAffirmative =
+      escalation.includes('escalat') &&
+      !/no escalation|not escalat|never escalat|no need to escalate|escalation (is )?not (needed|required|necessary)/.test(escalation);
+
     const isRed =
       priority.includes('critical') ||
       sentiment.includes('frustrat') ||
       sentiment.includes('angr') ||
-      escalation.includes('escalat');
+      isEscalationAffirmative;
 
     if (isRed) {
       return {
@@ -147,8 +144,13 @@ export const TicketHeader = memo(function TicketHeader({
                 <Undo2 className="w-3.5 h-3.5" />
                 Discard
               </button>
-              <button 
-                onClick={() => setIsTitleSaved(true)}
+              <button
+                onClick={() => {
+                  // Was: only flipped the local saved flag, silently
+                  // discarding the edited title.
+                  onUpdate({ ...result, title: editedTitle });
+                  setIsTitleSaved(true);
+                }}
                 className="text-xs font-medium text-white hover:bg-emerald-700 bg-emerald-600 px-3 py-1.5 rounded-lg border border-emerald-700 transition-colors flex items-center gap-1.5 shadow-sm"
               >
                 <Save className="w-3.5 h-3.5" />

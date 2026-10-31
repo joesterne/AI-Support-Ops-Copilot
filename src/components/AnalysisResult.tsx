@@ -56,7 +56,7 @@ export const AnalysisResult = memo(function AnalysisResult({
             <TicketChat result={result} rawContent={rawContent} />
           </section>
 
-          <SuggestedResponseBlock result={result} onSendEmail={onSendEmail} />
+          <SuggestedResponseBlock result={result} onSendEmail={onSendEmail} onUpdate={onUpdate} />
 
           {/* Escalation Decision */}
           <section className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -72,7 +72,7 @@ export const AnalysisResult = memo(function AnalysisResult({
 
         {/* Right Column - Engineering & KB */}
         <div className="space-y-6">
-          <JiraDraftBlock result={result} />
+          <JiraDraftBlock result={result} onUpdate={onUpdate} />
           <KbSuggestionBlock result={result} onOpenEditor={handleOpenKbEditor} />
           <LatestNewsBlock result={result} rawContent={rawContent} />
 

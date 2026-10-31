@@ -5,7 +5,7 @@ const ReactQuill = lazy(() => import('react-quill-new'));
 import { cn } from '../../lib/utils';
 import 'react-quill-new/dist/quill.snow.css';
 
-export const JiraDraftBlock = memo(function JiraDraftBlock({ result }: { result: TicketAnalysis }) {
+export const JiraDraftBlock = memo(function JiraDraftBlock({ result, onUpdate }: { result: TicketAnalysis, onUpdate: (result: TicketAnalysis) => void }) {
   const [jiraTitle, setJiraTitle] = useState(result.jiraBugDraft?.title || '');
   const [jiraDescription, setJiraDescription] = useState(result.jiraBugDraft?.description || '');
   const [isJiraDraftSaved, setIsJiraDraftSaved] = useState(false);
@@ -114,23 +114,41 @@ export const JiraDraftBlock = memo(function JiraDraftBlock({ result }: { result:
               </button>
             )}
             {!isJiraDraftSaved && (
-              <button 
-                onClick={() => setIsJiraDraftSaved(true)}
+              <button
+                onClick={() => {
+                  // Was: only flipped a local flag; the edited draft never
+                  // reached the parent result.
+                  onUpdate({ ...result, jiraBugDraft: { title: jiraTitle, description: jiraDescription } });
+                  setIsJiraDraftSaved(true);
+                }}
                 className="text-xs font-medium text-white hover:bg-blue-700 bg-blue-600 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 shadow-sm"
               >
                 <Save className="w-3.5 h-3.5" />
                 Save Draft
               </button>
             )}
-            <a 
-              href={`https://jira.example.com/secure/CreateIssue.jspa?issuetype=1&summary=${encodeURIComponent(jiraTitle)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs font-medium text-white hover:bg-blue-700 bg-blue-600 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 shadow-sm"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              Create in Jira
-            </a>
+            {/* Base URL is configurable via VITE_JIRA_BASE_URL; the link used
+                to point at the placeholder jira.example.com and dropped the
+                (possibly edited) description. */}
+            {(import.meta as any).env?.VITE_JIRA_BASE_URL ? (
+              <a
+                href={`${(import.meta as any).env.VITE_JIRA_BASE_URL}/secure/CreateIssue.jspa?issuetype=1&summary=${encodeURIComponent(jiraTitle)}&description=${encodeURIComponent(jiraDescription)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-medium text-white hover:bg-blue-700 bg-blue-600 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 shadow-sm"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Create in Jira
+              </a>
+            ) : (
+              <span
+                title="Set VITE_JIRA_BASE_URL to enable Jira creation"
+                className="text-xs font-medium text-gray-400 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-md flex items-center gap-1.5 cursor-not-allowed"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Create in Jira (not configured)
+              </span>
+            )}
           </div>
         </div>
         

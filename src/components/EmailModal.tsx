@@ -33,6 +33,7 @@ export function EmailModal({ isOpen, onClose, defaultBody, classification }: Ema
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <Mail className="w-5 h-5 text-indigo-600" />
             Send Email Response
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">Demo — simulated send</span>
           </h2>
           <button 
             onClick={onClose}
@@ -44,11 +45,11 @@ export function EmailModal({ isOpen, onClose, defaultBody, classification }: Ema
 
         {isSent ? (
           <div className="p-12 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle className="w-8 h-8 text-emerald-600" />
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle className="w-8 h-8 text-amber-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Email Sent Successfully</h3>
-            <p className="text-gray-500">The response has been sent to the customer.</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Demo Only — Nothing Was Sent</h3>
+            <p className="text-gray-500">This modal simulates sending. No email left the app; copy the response or send it from your mail client.</p>
           </div>
         ) : (
           <form onSubmit={handleSend} className="flex flex-col h-full">
@@ -100,7 +101,7 @@ export function EmailModal({ isOpen, onClose, defaultBody, classification }: Ema
                 className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-2"
               >
                 <Send className="w-4 h-4" />
-                Send Email
+                Simulate Send
               </button>
             </div>
           </form>

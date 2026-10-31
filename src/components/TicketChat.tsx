@@ -49,6 +49,13 @@ export function TicketChat({ result, rawContent }: { result: TicketAnalysis, raw
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
+  // A restored/different ticket gets a fresh conversation: the previous
+  // ticket's messages used to stay on screen while the copilot's context
+  // silently switched to the new ticket.
+  useEffect(() => {
+    setMessages([]);
+  }, [rawContent]);
+
   const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
 

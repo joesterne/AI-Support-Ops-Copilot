@@ -4,6 +4,7 @@ import { AnalysisResult } from './components/AnalysisResult';
 import { SettingsMenu } from './components/SettingsMenu';
 import { EmailModal } from './components/EmailModal';
 import { analyzeTicket, TicketAnalysis } from './services/ai';
+import { getPriorityColors } from './lib/utils';
 import { Bot, Sparkles, History, X, Settings2 } from 'lucide-react';
 
 interface HistoryItem {
@@ -13,21 +14,16 @@ interface HistoryItem {
   analysis: TicketAnalysis;
 }
 
-const getPriorityColors = (priority: string) => {
-  const p = priority?.toLowerCase() || '';
-  if (p.includes('critical')) return 'bg-rose-100 text-rose-700 border-rose-200';
-  if (p.includes('high')) return 'bg-orange-100 text-orange-700 border-orange-200';
-  if (p.includes('medium')) return 'bg-amber-100 text-amber-700 border-amber-200';
-  if (p.includes('low')) return 'bg-blue-100 text-blue-700 border-blue-200';
-  return 'bg-gray-100 text-gray-700 border-gray-200';
-};
-
 export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<TicketAnalysis | null>(null);
   const [currentTicketContent, setCurrentTicketContent] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  // Which history entry is on screen. Updates must land on THIS entry —
+  // handleUpdateResult used to rewrite index 0 unconditionally, so editing a
+  // restored older item silently overwrote the newest entry instead.
+  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
   const [isHistoryMenuOpen, setIsHistoryMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
 
@@ -47,10 +43,12 @@ export default function App() {
     
     try {
       const analysis = await analyzeTicket(content, priorities, classifications);
+      const id = Date.now().toString();
       setResult(analysis);
       setCurrentTicketContent(content);
+      setActiveHistoryId(id);
       setHistory(prev => [{
-        id: Date.now().toString(),
+        id,
         timestamp: new Date(),
         rawContent: content,
         analysis
@@ -65,15 +63,16 @@ export default function App() {
   const handleRestoreHistory = useCallback((item: HistoryItem) => {
     setResult(item.analysis);
     setCurrentTicketContent(item.rawContent);
+    setActiveHistoryId(item.id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const handleUpdateResult = useCallback((updatedResult: TicketAnalysis) => {
     setResult(updatedResult);
-    setHistory(prev => prev.map((item, index) => 
-      index === 0 ? { ...item, analysis: updatedResult } : item
+    setHistory(prev => prev.map((item) =>
+      item.id === activeHistoryId ? { ...item, analysis: updatedResult } : item
     ));
-  }, []);
+  }, [activeHistoryId]);
 
   const handleSendEmail = useCallback((body: string, classification: string) => {
     setEmailBody(body);
